@@ -5,12 +5,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-
-	_ "github.com/joho/godotenv/autoload"
+	"rest-api-go/internal/database"
+	"rest-api-go/internal/utils"
 )
 
 func main() {
+	pool, err := database.ConnectToDB(utils.Env.DATABASE_URL)
+
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+
+	defer pool.Close()
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +26,10 @@ func main() {
 			return
 		}
 
+		fmt.Println(r.Header.Get("user-agent"))
+		fmt.Println(r.RemoteAddr)
+
+		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 
 		if err := json.NewEncoder(w).Encode(struct {
@@ -32,7 +43,7 @@ func main() {
 		}
 	})
 
-	port := os.Getenv("PORT")
+	port := utils.Env.PORT
 
 	server := &http.Server{
 		Addr:    ":" + port,
