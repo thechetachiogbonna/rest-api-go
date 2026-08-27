@@ -43,7 +43,7 @@ func main() {
 		}
 	})
 
-	mux.Handle("/auth/", http.StripPrefix("/auth", routes.AuthRoutes()))
+	mux.Handle("/auth/", http.StripPrefix("/auth", routes.AuthRoutes(pool)))
 
 	port := config.Env.PORT
 
