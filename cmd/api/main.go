@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"rest-api-go/internal/config"
 	"rest-api-go/internal/database"
-	"rest-api-go/internal/utils"
+	"rest-api-go/internal/routes"
 )
 
+type ApiResponse struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
+}
+
 func main() {
-	pool, err := database.ConnectToDB(utils.Env.DATABASE_URL)
+	pool, err := database.ConnectToDB(config.Env.DATABASE_URL)
 
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
@@ -26,24 +32,20 @@ func main() {
 			return
 		}
 
-		fmt.Println(r.Header.Get("user-agent"))
-		fmt.Println(r.RemoteAddr)
-
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 
-		if err := json.NewEncoder(w).Encode(struct {
-			Message string `json:"message"`
-			Status  string `json:"status"`
-		}{
+		if err := json.NewEncoder(w).Encode(ApiResponse{
 			Message: "Hello from my first API in GO!",
-			Status:  "success",
+			Status:  "OK",
 		}); err != nil {
 			log.Printf("Failed to encode response: %v", err)
 		}
 	})
 
-	port := utils.Env.PORT
+	mux.Handle("/auth/", http.StripPrefix("/auth", routes.AuthRoutes()))
+
+	port := config.Env.PORT
 
 	server := &http.Server{
 		Addr:    ":" + port,
