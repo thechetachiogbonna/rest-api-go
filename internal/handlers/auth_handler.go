@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"rest-api-go/internal/models"
 	"rest-api-go/internal/repository"
+	"rest-api-go/internal/utils"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,16 +19,18 @@ func (auth *Auth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (auth *Auth) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var payload models.User
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	err := repository.CreateUser(auth.Pool, payload.FirstName, payload.LastName, payload.Email, payload.Password)
 	if err != nil {
-		http.Error(w, "failed to create user", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusConflict, err)
 		return
 	}
+
+	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": "User Created Successfully."})
 }
 
 func (auth *Auth) LogoutHandler(w http.ResponseWriter, r *http.Request) {

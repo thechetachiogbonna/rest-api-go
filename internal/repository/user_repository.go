@@ -44,7 +44,8 @@ func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
 	defer cancel()
 
 	query := `
-		SELECT * FROM users WHERE email = $1
+		SELECT id, email, first_name, last_name, password, created_at, updated_at
+		FROM users WHERE email = $1
 	`
 
 	user := models.User{}
@@ -54,6 +55,7 @@ func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
 		&user.Email,
 		&user.FirstName,
 		&user.LastName,
+		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
