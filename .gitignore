@@ -1,1 +1,31 @@
+# Binaries and build artifacts
+/bin/
+/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go build cache & output logs
+build-errors.log
+
+# Environment variables & secrets (NEVER commit actual credentials!)
 .env
+.env.local
+.env.*.local
+*.pem
+
+# IDE / Editor configurations
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# OS specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
