@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string) error {
+func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	defer cancel()
@@ -18,24 +18,42 @@ func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string)
 	_, err := GetUserByEmail(pool, email)
 
 	if err == nil {
-		return fmt.Errorf("User with email %s already exists", email)
+		return nil, fmt.Errorf("User with email %s already exists", email)
 	}
 
-	query := `INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4)`
+	query := `
+		INSERT INTO users (
+			first_name,
+			last_name,
+			email,
+			password
+		) 
+		VALUES ($1, $2, $3, $4) 
+		RETURNING id, email, first_name, last_name, created_at, updated_at
+	`
 
 	hashedPassword, err := utils.HashPassword(password)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = pool.Exec(ctx, query, firstName, lastName, email, hashedPassword)
+	var user models.User
+
+	err = pool.QueryRow(ctx, query, firstName, lastName, email, hashedPassword).Scan(
+		&user.ID,
+		&user.Email,
+		&user.FirstName,
+		&user.LastName,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &user, nil
 }
 
 func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
