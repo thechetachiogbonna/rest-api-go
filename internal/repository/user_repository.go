@@ -18,7 +18,7 @@ func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string)
 	_, err := GetUserByEmail(pool, email)
 
 	if err == nil {
-		return fmt.Errorf("user with email %s already exists", email)
+		return fmt.Errorf("User with email %s already exists", email)
 	}
 
 	query := `INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4)`
@@ -44,7 +44,7 @@ func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
 	defer cancel()
 
 	query := `
-		SELECT id, email, first_name, last_name, password, created_at, updated_at
+		SELECT id, email, first_name, last_name, created_at, updated_at
 		FROM users WHERE email = $1
 	`
 
@@ -55,7 +55,6 @@ func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
 		&user.Email,
 		&user.FirstName,
 		&user.LastName,
-		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)

@@ -1,13 +1,14 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"rest-api-go/internal/config"
 	"rest-api-go/internal/database"
 	"rest-api-go/internal/routes"
+	"rest-api-go/internal/utils"
 )
 
 type ApiResponse struct {
@@ -28,14 +29,11 @@ func main() {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			utils.WriteError(w, http.StatusMethodNotAllowed, errors.New("Method Not Allowed"))
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		if err := json.NewEncoder(w).Encode(ApiResponse{
+		if err := utils.WriteJson(w, http.StatusOK, ApiResponse{
 			Message: "Hello from my first API in GO!",
 			Status:  "OK",
 		}); err != nil {

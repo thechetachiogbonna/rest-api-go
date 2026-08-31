@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"rest-api-go/internal/models"
 	"rest-api-go/internal/repository"
+	"rest-api-go/internal/types"
 	"rest-api-go/internal/utils"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -18,8 +18,13 @@ func (auth *Auth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (auth *Auth) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	var payload models.User
+	var payload types.RegisterPayload
 	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}

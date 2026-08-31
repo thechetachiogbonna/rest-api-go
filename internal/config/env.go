@@ -11,11 +11,17 @@ type env struct {
 	DATABASE_URL string
 }
 
-func getEnv() *env {
-	return &env{
-		PORT:         os.Getenv("PORT"),
-		DATABASE_URL: os.Getenv("DATABASE_URL"),
+func getEnv(key, fallback string) string {
+	value, ok := os.LookupEnv(key)
+
+	if !ok {
+		return fallback
 	}
+
+	return value
 }
 
-var Env = getEnv()
+var Env = &env{
+	PORT:         getEnv("PORT", "3000"),
+	DATABASE_URL: getEnv("DATABASE_URL", ""),
+}
