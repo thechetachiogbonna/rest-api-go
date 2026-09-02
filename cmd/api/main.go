@@ -9,6 +9,8 @@ import (
 	"rest-api-go/internal/database"
 	"rest-api-go/internal/routes"
 	"rest-api-go/internal/utils"
+
+	"github.com/rs/cors"
 )
 
 type ApiResponse struct {
@@ -33,6 +35,11 @@ func main() {
 			return
 		}
 
+		if r.URL.Path != "/" {
+			utils.WriteError(w, http.StatusNotFound, errors.New("Not Found"))
+			return
+		}
+
 		if err := utils.WriteJson(w, http.StatusOK, ApiResponse{
 			Message: "Hello from my first API in GO!",
 			Status:  "OK",
@@ -41,13 +48,23 @@ func main() {
 		}
 	})
 
-	mux.Handle("/auth/", http.StripPrefix("/auth", routes.AuthRoutes(pool)))
+	mux.Handle("/api/auth/", http.StripPrefix("/api/auth", routes.AuthRoutes(pool)))
 
 	port := config.Env.PORT
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{config.Env.FRONTEND_URL},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+		Debug:            true,
+	})
+
+	handler := c.Handler(mux)
+
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: mux,
+		Handler: handler,
 	}
 
 	fmt.Println("Server is running on http://localhost:" + port)
