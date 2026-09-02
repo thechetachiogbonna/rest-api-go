@@ -2,15 +2,17 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"rest-api-go/internal/models"
 	"rest-api-go/internal/utils"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string) (*models.User, error) {
+func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	defer cancel()
@@ -18,7 +20,7 @@ func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string)
 	_, err := GetUserByEmail(pool, email)
 
 	if err == nil {
-		return nil, fmt.Errorf("User with email %s already exists", email)
+		return "", fmt.Errorf("User with email %s already exists", email)
 	}
 
 	query := `
@@ -29,55 +31,50 @@ func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string)
 			password
 		) 
 		VALUES ($1, $2, $3, $4) 
-		RETURNING id, email, first_name, last_name, created_at, updated_at
+		RETURNING id
 	`
 
 	hashedPassword, err := utils.HashPassword(password)
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	var user models.User
+	var userID string
 
-	err = pool.QueryRow(ctx, query, firstName, lastName, email, hashedPassword).Scan(
-		&user.ID,
-		&user.Email,
-		&user.FirstName,
-		&user.LastName,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
-
+	err = pool.QueryRow(ctx, query, firstName, lastName, email, hashedPassword).Scan(&userID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &user, nil
+	return userID, nil
 }
 
 func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-
 	defer cancel()
 
 	query := `
-		SELECT id, email, first_name, last_name, created_at, updated_at
-		FROM users WHERE email = $1
+		SELECT id, first_name, last_name, email, password, created_at, updated_at
+		FROM users 
+		WHERE email = $1
 	`
 
-	user := models.User{}
-
+	var user models.User
 	err := pool.QueryRow(ctx, query, email).Scan(
 		&user.ID,
-		&user.Email,
 		&user.FirstName,
 		&user.LastName,
+		&user.Email,
+		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
 
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.New("user not found")
+		}
 		return nil, err
 	}
 

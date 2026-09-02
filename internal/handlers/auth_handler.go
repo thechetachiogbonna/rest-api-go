@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
-	"rest-api-go/internal/config"
 	"rest-api-go/internal/repository"
 	"rest-api-go/internal/types"
 	"rest-api-go/internal/utils"
@@ -16,7 +16,43 @@ type Auth struct {
 }
 
 func (auth *Auth) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
+	var payload types.LoginPayload
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	user, err := repository.GetUserByEmail(auth.Pool, payload.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, errors.New("Invalid email or password."))
+		return
+	}
+
+	err = utils.ComparePasswords(user.Password, payload.Password)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, errors.New("Invalid email or password."))
+		return
+	}
+
+	sessionID, err := repository.CreateSession(auth.Pool, user.ID, r.RemoteAddr, r.UserAgent())
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	accessToken, refreshToken, err := utils.GetAccessAndRefreshTokens(user.ID, sessionID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+	}
+
+	utils.SetAuthCookies(w, accessToken, refreshToken)
+
+	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": "User logged in successfully."})
 }
 
 func (auth *Auth) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,39 +67,26 @@ func (auth *Auth) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := repository.CreateUser(auth.Pool, payload.FirstName, payload.LastName, payload.Email, payload.Password)
+	userID, err := repository.CreateUser(auth.Pool, payload.FirstName, payload.LastName, payload.Email, payload.Password)
 	if err != nil {
 		utils.WriteError(w, http.StatusConflict, err)
 		return
 	}
 
-	session, err := repository.CreateSession(auth.Pool, user.ID, r.RemoteAddr, r.UserAgent())
+	sessionID, err := repository.CreateSession(auth.Pool, userID, r.RemoteAddr, r.UserAgent())
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	accessToken, err := utils.GenerateToken(utils.Payload{
-		UserID:    user.ID,
-		SessionID: session.ID,
-	}, utils.AccessTokenRegisterClaims, config.Env.JWT_SECRET)
+	accessToken, refreshToken, err := utils.GetAccessAndRefreshTokens(userID, sessionID)
 	if err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, err)
-		return
-	}
-
-	refreshToken, err := utils.GenerateToken(utils.Payload{
-		UserID:    user.ID,
-		SessionID: session.ID,
-	}, utils.RefreshTokenRegisterClaims, config.Env.JWT_REFRESH_SECRET)
-	if err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, err)
-		return
+		utils.WriteError(w, http.StatusInternalServerError, err)
 	}
 
 	utils.SetAuthCookies(w, accessToken, refreshToken)
 
-	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": fmt.Sprintf("User created successfully with id %q.", user.ID)})
+	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": fmt.Sprintf("User created successfully with id %q.", userID)})
 }
 
 func (auth *Auth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
