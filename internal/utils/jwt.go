@@ -17,18 +17,22 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-var AccessTokenRegisterClaims = &jwt.RegisteredClaims{
-	Issuer:    ISSUER,
-	Audience:  jwt.ClaimStrings{AUDIENCE},
-	IssuedAt:  jwt.NewNumericDate(time.Now()),
-	ExpiresAt: jwt.NewNumericDate(time.Now().Add(FIFTEEN_MINUTES)), // 15 minutes
+func GetAccessTokenRegisterClaims() *jwt.RegisteredClaims {
+	return &jwt.RegisteredClaims{
+		Issuer:    ISSUER,
+		Audience:  jwt.ClaimStrings{AUDIENCE},
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(FIFTEEN_MINUTES)), // 15 minutes
+	}
 }
 
-var RefreshTokenRegisterClaims = &jwt.RegisteredClaims{
-	Issuer:    ISSUER,
-	Audience:  jwt.ClaimStrings{AUDIENCE},
-	IssuedAt:  jwt.NewNumericDate(time.Now()),
-	ExpiresAt: jwt.NewNumericDate(time.Now().Add(THIRTY_DAYS)), // 30 days
+func GetRefreshTokenRegisterClaims() *jwt.RegisteredClaims {
+	return &jwt.RegisteredClaims{
+		Issuer:    ISSUER,
+		Audience:  jwt.ClaimStrings{AUDIENCE},
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(THIRTY_DAYS)), // 30 days
+	}
 }
 
 func GenerateToken(payload Payload, registerClaims *jwt.RegisteredClaims, secret string) (string, error) {
@@ -44,4 +48,21 @@ func GenerateToken(payload Payload, registerClaims *jwt.RegisteredClaims, secret
 	}
 
 	return tokenString, nil
+}
+
+func VerifyToken(tokenString string, secret string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %w", err)
+	}
+	if !token.Valid {
+		return nil, fmt.Errorf("token is not valid")
+	}
+	return claims, nil
 }

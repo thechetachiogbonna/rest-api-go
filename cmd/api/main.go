@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"rest-api-go/internal/config"
 	"rest-api-go/internal/database"
+	"rest-api-go/internal/middleware"
 	"rest-api-go/internal/routes"
 	"rest-api-go/internal/utils"
 
@@ -49,6 +50,10 @@ func main() {
 	})
 
 	mux.Handle("/api/auth/", http.StripPrefix("/api/auth", routes.AuthRoutes(pool)))
+	mux.Handle("GET /api/products/", middleware.Authenticate(pool, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Active from middleware..."))
+		fmt.Println("userID: ", r.Context().Value(middleware.UserIDKey))
+	})))
 
 	port := config.Env.PORT
 

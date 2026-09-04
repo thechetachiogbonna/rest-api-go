@@ -8,7 +8,7 @@ func GetAccessAndRefreshTokens(userID, sessionID string) (accessToken, refreshTo
 	accessToken, err = GenerateToken(Payload{
 		UserID:    userID,
 		SessionID: sessionID,
-	}, AccessTokenRegisterClaims, config.Env.JWT_SECRET)
+	}, GetAccessTokenRegisterClaims(), config.Env.JWT_SECRET)
 	if err != nil {
 		return "", "", err
 	}
@@ -16,7 +16,7 @@ func GetAccessAndRefreshTokens(userID, sessionID string) (accessToken, refreshTo
 	refreshToken, err = GenerateToken(Payload{
 		UserID:    userID,
 		SessionID: sessionID,
-	}, RefreshTokenRegisterClaims, config.Env.JWT_REFRESH_SECRET)
+	}, GetRefreshTokenRegisterClaims(), config.Env.JWT_REFRESH_SECRET)
 	if err != nil {
 		return "", "", err
 	}

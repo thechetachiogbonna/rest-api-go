@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"rest-api-go/internal/repository"
 	"rest-api-go/internal/types"
@@ -52,7 +51,7 @@ func (auth *Auth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	utils.SetAuthCookies(w, accessToken, refreshToken)
 
-	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": "User logged in successfully."})
+	utils.WriteJson(w, http.StatusCreated, map[string]any{"user": user})
 }
 
 func (auth *Auth) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -67,26 +66,26 @@ func (auth *Auth) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := repository.CreateUser(auth.Pool, payload.FirstName, payload.LastName, payload.Email, payload.Password)
+	user, err := repository.CreateUser(auth.Pool, payload.FirstName, payload.LastName, payload.Email, payload.Password)
 	if err != nil {
 		utils.WriteError(w, http.StatusConflict, err)
 		return
 	}
 
-	sessionID, err := repository.CreateSession(auth.Pool, userID, r.RemoteAddr, r.UserAgent())
+	sessionID, err := repository.CreateSession(auth.Pool, user.ID, r.RemoteAddr, r.UserAgent())
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	accessToken, refreshToken, err := utils.GetAccessAndRefreshTokens(userID, sessionID)
+	accessToken, refreshToken, err := utils.GetAccessAndRefreshTokens(user.ID, sessionID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 	}
 
 	utils.SetAuthCookies(w, accessToken, refreshToken)
 
-	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": fmt.Sprintf("User created successfully with id %q.", userID)})
+	utils.WriteJson(w, http.StatusCreated, map[string]any{"user": user})
 }
 
 func (auth *Auth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
