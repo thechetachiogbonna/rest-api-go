@@ -60,3 +60,20 @@ func GetSessionByUserIDAndSessionID(pool *pgxpool.Pool, userID, sessionID string
 
 	return &session, nil
 }
+
+func DeleteSession(pool *pgxpool.Pool, userID, sessionID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+		DELETE FROM sessions
+		WHERE id = $1 AND user_id = $2
+	`
+
+	_, err := pool.Exec(ctx, query, sessionID, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

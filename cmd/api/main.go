@@ -14,11 +14,6 @@ import (
 	"github.com/rs/cors"
 )
 
-type ApiResponse struct {
-	Message string `json:"message"`
-	Status  string `json:"status"`
-}
-
 func main() {
 	pool, err := database.ConnectToDB(config.Env.DATABASE_URL)
 
@@ -41,9 +36,9 @@ func main() {
 			return
 		}
 
-		if err := utils.WriteJson(w, http.StatusOK, ApiResponse{
-			Message: "Hello from my first API in GO!",
-			Status:  "OK",
+		if err := utils.WriteJson(w, http.StatusOK, map[string]string{
+			"message": "Hello from my first API in GO!",
+			"status":  "OK",
 		}); err != nil {
 			log.Printf("Failed to encode response: %v", err)
 		}

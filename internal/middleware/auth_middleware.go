@@ -20,6 +20,8 @@ const UserIDKey contextKey = "userID"
 func Authenticate(pool *pgxpool.Pool, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("accessToken")
+
+		fmt.Println(cookie)
 		if err != nil {
 			utils.WriteError(w, http.StatusBadRequest, errors.New("Missing access token"))
 			return
