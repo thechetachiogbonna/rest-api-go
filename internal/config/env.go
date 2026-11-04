@@ -12,6 +12,7 @@ type env struct {
 	JWT_SECRET         string
 	JWT_REFRESH_SECRET string
 	FRONTEND_URL       string
+	GO_ENV             string
 }
 
 func getEnv(key, fallback string) string {
@@ -30,4 +31,5 @@ var Env = &env{
 	JWT_SECRET:         getEnv("JWT_SECRET", "f27786b1ddb611582156f7c3a4eb634a264c7b09e94ac6f9398b9e915709e2a5"),
 	JWT_REFRESH_SECRET: getEnv("JWT_REFRESH_SECRET", "jwt_refresh_secret"),
 	FRONTEND_URL:       getEnv("FRONTEND_URL", "http://localhost:5173"),
+	GO_ENV:             getEnv("GO_ENV", "development"),
 }

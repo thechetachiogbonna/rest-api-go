@@ -2,7 +2,10 @@ package utils
 
 import (
 	"net/http"
+	"rest-api-go/internal/config"
 )
+
+var secureCookie = config.Env.GO_ENV == "production"
 
 func GetAccessTokenCookieAttributes(accessToken string) *http.Cookie {
 	return &http.Cookie{
@@ -11,7 +14,7 @@ func GetAccessTokenCookieAttributes(accessToken string) *http.Cookie {
 		Value:    accessToken,
 		MaxAge:   int(FIFTEEN_MINUTES), // 15 minutes
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   secureCookie,
 		SameSite: http.SameSiteStrictMode,
 	}
 }
@@ -23,7 +26,7 @@ func GetRefreshTokenCookieAttributes(refreshToken string) *http.Cookie {
 		Value:    refreshToken,
 		MaxAge:   int(THIRTY_DAYS), // 30 days
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   secureCookie,
 		SameSite: http.SameSiteStrictMode,
 	}
 }
@@ -40,7 +43,7 @@ func ClearAuthCookies(w http.ResponseWriter) {
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   secureCookie,
 		SameSite: http.SameSiteStrictMode,
 	}
 
@@ -49,7 +52,7 @@ func ClearAuthCookies(w http.ResponseWriter) {
 		Path:     REFRESH_PATH,
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   secureCookie,
 		SameSite: http.SameSiteStrictMode,
 	}
 
