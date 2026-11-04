@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"rest-api-go/internal/config"
 	"rest-api-go/internal/repository"
@@ -20,9 +19,7 @@ const UserIDKey contextKey = "userID"
 func Authenticate(pool *pgxpool.Pool, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("accessToken")
-		refreshCookie, _ := r.Cookie("refreshToken")
 
-		fmt.Println(cookie, refreshCookie)
 		if err != nil {
 			utils.WriteError(w, http.StatusBadRequest, errors.New("Missing access token"))
 			return
@@ -39,8 +36,6 @@ func Authenticate(pool *pgxpool.Pool, next http.Handler) http.Handler {
 			utils.WriteError(w, http.StatusUnauthorized, errors.New("Invalid or expired session"))
 			return
 		}
-
-		fmt.Println(session.ID)
 
 		ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
 		next.ServeHTTP(w, r.WithContext(ctx))

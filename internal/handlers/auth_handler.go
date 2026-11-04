@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"rest-api-go/internal/config"
 	"rest-api-go/internal/repository"
@@ -97,12 +96,7 @@ func (auth *Auth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		claims, err := utils.VerifyToken(cookie.Value, config.Env.JWT_SECRET)
 		if err == nil {
 			err = repository.DeleteSession(auth.Pool, claims.UserID, claims.SessionID)
-			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, err)
-				return
-			}
 		}
-
 	}
 
 	utils.ClearAuthCookies(w)
@@ -113,13 +107,10 @@ func (auth *Auth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 func (auth *Auth) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("refreshToken")
 
-	fmt.Println(err)
 	if err != nil || cookie.Value == "" {
-		fmt.Println("called...")
 		utils.WriteError(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	fmt.Println("won't be called...")
 
 	claims, err := utils.VerifyToken(cookie.Value, config.Env.JWT_REFRESH_SECRET)
 	if err != nil {
@@ -127,8 +118,12 @@ func (auth *Auth) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Optionally, check session validity in DB
-	// Generate new tokens
+	_, err = repository.GetSessionByUserIDAndSessionID(auth.Pool, claims.UserID, claims.SessionID)
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, errors.New("Invalid refresh token"))
+		return
+	}
+
 	accessToken, refreshToken, err := utils.GetAccessAndRefreshTokens(claims.UserID, claims.SessionID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
