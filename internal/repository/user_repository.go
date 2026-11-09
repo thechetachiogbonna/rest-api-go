@@ -118,3 +118,33 @@ func GetUserByID(pool *pgxpool.Pool, userID string) (*models.User, error) {
 
 	return &user, nil
 }
+
+func UpdateUserByID(pool *pgxpool.Pool, userID string, firstName, lastName, email string) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+		UPDATE users 
+		SET first_name = $1, last_name = $2, email = $3, updated_at = NOW() 
+		WHERE id = $4 
+		RETURNING id, first_name, last_name, email, created_at, updated_at
+	`
+	var user models.User
+	err := pool.QueryRow(ctx, query, firstName, lastName, email, userID).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}

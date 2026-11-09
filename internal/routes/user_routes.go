@@ -12,6 +12,7 @@ func UserRoutes(pool *pgxpool.Pool) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /me", user.GetCurrentUser)
+	mux.HandleFunc("PUT /{id}", user.UpdateUserByID)
 
 	return mux
 }
