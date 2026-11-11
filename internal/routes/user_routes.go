@@ -8,11 +8,11 @@ import (
 )
 
 func UserRoutes(pool *pgxpool.Pool) *http.ServeMux {
-	user := &handlers.User{Pool: pool}
+	userHandler := &handlers.User{Pool: pool}
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /me", user.GetCurrentUser)
-	mux.HandleFunc("PUT /{id}", user.UpdateUserByID)
+	mux.HandleFunc("GET /me", userHandler.GetCurrentUser)
+	mux.HandleFunc("PUT /{id}", userHandler.UpdateUserByID)
 
 	return mux
 }

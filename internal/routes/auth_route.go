@@ -8,13 +8,13 @@ import (
 )
 
 func AuthRoutes(pool *pgxpool.Pool) *http.ServeMux {
-	auth := &handlers.Auth{Pool: pool}
+	authHandler := &handlers.Auth{Pool: pool}
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /login", auth.LoginHandler)
-	mux.HandleFunc("POST /register", auth.RegisterHandler)
-	mux.HandleFunc("POST /logout", auth.LogoutHandler)
-	mux.HandleFunc("GET /refresh", auth.RefreshHandler)
+	mux.HandleFunc("POST /login", authHandler.LoginHandler)
+	mux.HandleFunc("POST /register", authHandler.RegisterHandler)
+	mux.HandleFunc("POST /logout", authHandler.LogoutHandler)
+	mux.HandleFunc("GET /refresh", authHandler.RefreshHandler)
 
 	return mux
 }
