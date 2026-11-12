@@ -31,7 +31,7 @@ func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string)
 			password
 		) 
 		VALUES ($1, $2, $3, $4) 
-		RETURNING id, first_name, last_name, email, created_at, updated_at
+		RETURNING id, first_name, last_name, email, role, created_at, updated_at
 	`
 
 	hashedPassword, err := utils.HashPassword(password)
@@ -47,6 +47,7 @@ func CreateUser(pool *pgxpool.Pool, firstName, lastName, email, password string)
 		&user.FirstName,
 		&user.LastName,
 		&user.Email,
+		&user.Role,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -62,7 +63,7 @@ func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
 	defer cancel()
 
 	query := `
-		SELECT id, first_name, last_name, email, password, created_at, updated_at
+		SELECT id, first_name, last_name, email, role, password, created_at, updated_at
 		FROM users 
 		WHERE email = $1
 	`
@@ -73,6 +74,7 @@ func GetUserByEmail(pool *pgxpool.Pool, email string) (*models.User, error) {
 		&user.FirstName,
 		&user.LastName,
 		&user.Email,
+		&user.Role,
 		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
@@ -93,7 +95,7 @@ func GetUserByID(pool *pgxpool.Pool, userID string) (*models.User, error) {
 	defer cancel()
 
 	query := `
-		SELECT id, first_name, last_name, email, password, created_at, updated_at
+		SELECT id, first_name, last_name, email, role, password, created_at, updated_at
 		FROM users 
 		WHERE id = $1
 	`
@@ -104,6 +106,7 @@ func GetUserByID(pool *pgxpool.Pool, userID string) (*models.User, error) {
 		&user.FirstName,
 		&user.LastName,
 		&user.Email,
+		&user.Role,
 		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
@@ -127,7 +130,7 @@ func UpdateUserByID(pool *pgxpool.Pool, userID string, firstName, lastName, emai
 		UPDATE users 
 		SET first_name = $1, last_name = $2, email = $3, updated_at = NOW() 
 		WHERE id = $4 
-		RETURNING id, first_name, last_name, email, created_at, updated_at
+		RETURNING id, first_name, last_name, email, role, created_at, updated_at
 	`
 	var user models.User
 	err := pool.QueryRow(ctx, query, firstName, lastName, email, userID).Scan(
@@ -135,6 +138,7 @@ func UpdateUserByID(pool *pgxpool.Pool, userID string, firstName, lastName, emai
 		&user.FirstName,
 		&user.LastName,
 		&user.Email,
+		&user.Role,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)

@@ -69,3 +69,28 @@ func GetCategoryBySlug(pool *pgxpool.Pool, slug string) (*models.Category, error
 
 	return category, nil
 }
+
+func CreateCategory(pool *pgxpool.Pool, name, slug string) (*models.Category, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+		INSERT INTO categories (name, slug, created_at, updated_at)
+		VALUES ($1, $2, NOW(), NOW())
+		RETURNING id, name, slug, created_at, updated_at
+	`
+	category := &models.Category{}
+	err := pool.QueryRow(ctx, query, name, slug).Scan(
+		&category.ID,
+		&category.Name,
+		&category.Slug,
+		&category.CreatedAt,
+		&category.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return category, nil
+}

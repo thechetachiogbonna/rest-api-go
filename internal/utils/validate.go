@@ -1,42 +1,61 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
 
-var Validate = validator.New(validator.WithRequiredStructEnabled())
+var Validate = newValidator()
+
+func newValidator() *validator.Validate {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	validate.RegisterTagNameFunc(func(field reflect.StructField) string {
+		name := strings.SplitN(field.Tag.Get("json"), ",", 2)[0]
+		if name == "" || name == "-" {
+			return field.Name
+		}
+		return name
+	})
+	return validate
+}
 
 func FormatValidationError(err error) map[string]string {
-	errors := make(map[string]string)
+	formatted := make(map[string]string)
 
-	validateErrs, _ := err.(validator.ValidationErrors)
-	for _, e := range validateErrs {
-		errField := strings.ToLower(e.Field())
+	var validationErrors validator.ValidationErrors
+	if !errors.As(err, &validationErrors) {
+		return map[string]string{"error": err.Error()}
+	}
 
-		if errField == "firstname" {
-			errField = "first_name"
-		}
-
-		if errField == "lastname" {
-			errField = "last_name"
-		}
-
-		switch e.Tag() {
+	for _, fieldError := range validationErrors {
+		switch fieldError.Tag() {
 		case "required":
-			errors[errField] = "This field is required."
+			formatted[fieldError.Field()] = "This field is required."
 		case "email":
-			errors[errField] = "Invalid email format."
+			formatted[fieldError.Field()] = "Invalid email format."
 		case "min":
-			errors[errField] = fmt.Sprintf("Must be at least %s characters long", e.Param())
+			formatted[fieldError.Field()] = fmt.Sprintf("Must be at least %s.", validationLimit(fieldError))
 		case "max":
-			errors[errField] = fmt.Sprintf("Must not exceed %s characters long", e.Param())
+			formatted[fieldError.Field()] = fmt.Sprintf("Must be no more than %s.", validationLimit(fieldError))
 		default:
-			errors[errField] = fmt.Sprintf("Failed on constraint: %s", e.Tag())
+			formatted[fieldError.Field()] = fmt.Sprintf("Failed on constraint: %s", fieldError.Tag())
 		}
 	}
 
-	return errors
+	return formatted
+}
+
+func validationLimit(fieldError validator.FieldError) string {
+	switch fieldError.Kind() {
+	case reflect.String:
+		return fmt.Sprintf("%s characters", fieldError.Param())
+	case reflect.Array, reflect.Slice, reflect.Map:
+		return fmt.Sprintf("%s items", fieldError.Param())
+	default:
+		return fieldError.Param()
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"rest-api-go/internal/repository"
+	"rest-api-go/internal/types"
 	"rest-api-go/internal/utils"
 	"strings"
 
@@ -42,4 +43,25 @@ func (c *Category) GetCategoryBySlug(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJson(w, http.StatusOK, map[string]any{"category": category})
+}
+
+func (c *Category) CreateCategory(w http.ResponseWriter, r *http.Request) {
+	var payload types.CreateCategoryPayload
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	category, err := repository.CreateCategory(c.Pool, payload.Name, payload.Slug)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJson(w, http.StatusCreated, map[string]any{"category": category})
 }

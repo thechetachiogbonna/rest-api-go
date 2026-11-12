@@ -131,5 +131,5 @@ func (auth *Auth) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SetAuthCookies(w, accessToken, refreshToken)
-	utils.WriteJson(w, http.StatusOK, map[string]string{"message": "Token refreshed successfully"})
+	utils.WriteJson(w, http.StatusOK, map[string]string{"message": "Access token refreshed successfully"})
 }

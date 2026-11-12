@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE users DROP COLUMN "role";
+
+DROP TYPE enum_role;
+
+COMMIT;
