@@ -11,6 +11,10 @@ const ISSUER = "Rest-API-Go"
 const AUDIENCE = "user"
 const REFRESH_PATH = "/api/auth/refresh"
 
+type contextKey string
+
+const UserIDKey contextKey = "userID"
+
 func GetAccessAndRefreshTokens(userID, sessionID string) (accessToken, refreshToken string, err error) {
 	accessToken, err = GenerateToken(Payload{
 		UserID:    userID,

@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"rest-api-go/internal/middleware"
 	"rest-api-go/internal/repository"
 	"rest-api-go/internal/types"
 	"rest-api-go/internal/utils"
@@ -17,7 +16,7 @@ type User struct {
 }
 
 func (user *User) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID := r.Context().Value(utils.UserIDKey).(string)
 
 	userData, err := repository.GetUserByID(user.Pool, userID)
 

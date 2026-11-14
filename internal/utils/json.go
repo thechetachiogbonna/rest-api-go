@@ -20,6 +20,12 @@ func WriteJson(w http.ResponseWriter, status int, v any) error {
 	return json.NewEncoder(w).Encode(v)
 }
 
-func WriteError(w http.ResponseWriter, status int, err error) {
-	WriteJson(w, status, FormatValidationError(err))
+func WriteError(w http.ResponseWriter, status int, err any) {
+	er, ok := err.(error)
+	if !ok {
+		WriteJson(w, status, err)
+		return
+	}
+
+	WriteJson(w, status, FormatValidationError(er))
 }

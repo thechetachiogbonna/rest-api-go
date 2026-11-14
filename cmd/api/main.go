@@ -50,7 +50,7 @@ func main() {
 
 	mux.Handle("GET /api/products/", middleware.Authenticate(pool)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Active from middleware..."))
-		fmt.Println("userID: ", r.Context().Value(middleware.UserIDKey))
+		fmt.Println("userID: ", r.Context().Value(utils.UserIDKey))
 	})))
 
 	port := config.Env.PORT
