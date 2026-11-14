@@ -1,0 +1,59 @@
+@baseUrl = http://localhost:8000/api
+
+### Health check
+GET {{baseUrl}}/
+
+### Auth - Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john@example.com",
+  "password": "your-password"
+}
+
+### Auth - Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "chetachi@gmail.com",
+  "password": "123456789"
+}
+
+### Auth - Logout
+POST {{baseUrl}}/auth/logout
+
+### Auth - Refresh access token
+GET {{baseUrl}}/auth/refresh
+
+### Products - Get all
+GET {{baseUrl}}/products
+
+### Users - Get current user
+GET {{baseUrl}}/users/me
+
+### Users - Update user by id
+PUT {{baseUrl}}/users/db5956f5-69d4-46d2-b51a-1768086190b0
+Content-Type: application/json
+
+{
+  "password": "hiii"
+}
+
+### Categories - Get all
+GET {{baseUrl}}/categories
+
+### Categories - Get Category By SLug
+GET {{baseUrl}}/categories/phones
+
+### Categories - Create Category
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "Bags",
+  "slug": "bags"
+}

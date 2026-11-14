@@ -46,7 +46,7 @@ func (auth *Auth) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	utils.SetAuthCookies(w, accessToken, refreshToken)
 
-	utils.WriteJson(w, http.StatusCreated, map[string]any{"user": user})
+	utils.WriteJson(w, http.StatusCreated, map[string]any{"message": "User created successfully", "user": user})
 }
 
 func (auth *Auth) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +86,7 @@ func (auth *Auth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	utils.SetAuthCookies(w, accessToken, refreshToken)
 
-	utils.WriteJson(w, http.StatusOK, map[string]any{"user": user})
+	utils.WriteJson(w, http.StatusOK, map[string]any{"message": "User logged in successfully", "user": user})
 }
 
 func (auth *Auth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -124,12 +124,12 @@ func (auth *Auth) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, refreshToken, err := utils.GetAccessAndRefreshTokens(claims.UserID, claims.SessionID)
+	accessToken, _, err := utils.GetAccessAndRefreshTokens(claims.UserID, claims.SessionID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	utils.SetAuthCookies(w, accessToken, refreshToken)
+	http.SetCookie(w, utils.GetAccessTokenCookieAttributes(accessToken))
 	utils.WriteJson(w, http.StatusOK, map[string]string{"message": "Access token refreshed successfully"})
 }

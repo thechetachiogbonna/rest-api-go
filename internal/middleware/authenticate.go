@@ -17,13 +17,13 @@ func Authenticate(pool *pgxpool.Pool) Middleware {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("accessToken")
 			if err != nil || cookie.Value == "" {
-				utils.WriteError(w, http.StatusUnauthorized, map[string]any{"error": errors.New("Missing access token"), "errorCode": "InvalidAccessToken"})
+				utils.WriteError(w, http.StatusUnauthorized, errors.New("Missing access token"))
 				return
 			}
 
 			claims, err := utils.VerifyToken(cookie.Value, config.Env.JWT_SECRET)
 			if err != nil {
-				utils.WriteError(w, http.StatusUnauthorized, map[string]any{"error": err.Error(), "errorCode": "InvalidAccessToken"})
+				utils.WriteError(w, http.StatusUnauthorized, err)
 				return
 			}
 

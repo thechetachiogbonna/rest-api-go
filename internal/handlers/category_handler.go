@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"rest-api-go/internal/repository"
 	"rest-api-go/internal/types"
@@ -34,7 +34,7 @@ func (c *Category) GetCategoryBySlug(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if strings.Contains(err.Error(), "category not found") {
-			utils.WriteError(w, http.StatusNotFound, fmt.Errorf("Category not found"))
+			utils.WriteError(w, http.StatusNotFound, errors.New("Category not found"))
 			return
 		}
 
