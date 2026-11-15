@@ -52,6 +52,11 @@ func (user *User) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
 	firstName := payload.FirstName
 	if firstName == "" {
 		firstName = userData.FirstName

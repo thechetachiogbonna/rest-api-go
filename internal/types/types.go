@@ -13,9 +13,9 @@ type LoginPayload struct {
 }
 
 type UpdateUserByIDPayload struct {
-	FirstName string `json:"first_name" validate:"min=5,max=20"`
-	LastName  string `json:"last_name" validate:"min=5,max=20"`
-	Email     string `json:"email" validate:"email"`
+	FirstName string `json:"first_name" validate:"omitempty,min=5,max=20"`
+	LastName  string `json:"last_name" validate:"omitempty,min=5,max=20"`
+	Email     string `json:"email" validate:"omitempty,email"`
 }
 
 type CreateCategoryPayload struct {
