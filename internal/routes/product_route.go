@@ -12,6 +12,7 @@ func ProductRoutes(pool *pgxpool.Pool) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /", productHandler.GetAllProducts)
+	mux.HandleFunc("GET /{id}", productHandler.GetProductByID)
 
 	return mux
 }

@@ -40,7 +40,7 @@ PUT {{baseUrl}}/users/db5956f5-69d4-46d2-b51a-1768086190b0
 Content-Type: application/json
 
 {
-  "first_name": "chetachi_hi"
+  "first_name": "chetachi"
 }
 
 ### Categories - Get all

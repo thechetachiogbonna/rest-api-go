@@ -24,3 +24,18 @@ func (p *Product) GetAllProducts(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 	}
 }
+
+func (p *Product) GetProductByID(w http.ResponseWriter, r *http.Request) {
+	productID := r.PathValue("id")
+
+	product, err := repository.GetProductByID(p.Pool, productID)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := utils.WriteJson(w, http.StatusOK, map[string]any{"product": product}); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+	}
+}
