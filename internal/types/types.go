@@ -31,3 +31,12 @@ type CreateProductPayload struct {
 	Price         int    `json:"price" validate:"required"`
 	StockQuantity int    `json:"stock_quantity" validate:"required"`
 }
+
+type UpdateProductPayload struct {
+	CategoryID    string `json:"category_id" validate:"required"`
+	Name          string `json:"name" validate:"omitempty,min=3,max=50"`
+	Slug          string `json:"slug" validate:"omitempty,min=3,max=50"`
+	Description   string `json:"description" validate:"omitempty,min=10,max=200"`
+	Price         int    `json:"price" validate:"omitempty"`
+	StockQuantity int    `json:"stock_quantity" validate:"omitempty"`
+}

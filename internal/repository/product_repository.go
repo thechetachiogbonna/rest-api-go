@@ -2,9 +2,11 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"rest-api-go/internal/models"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -74,6 +76,9 @@ func GetProductByID(pool *pgxpool.Pool, productID string) (*models.Product, erro
 		&product.CreatedAt,
 		&product.UpdatedAt,
 	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.New("category not found")
+		}
 		return nil, err
 	}
 
@@ -91,6 +96,36 @@ func CreateProduct(pool *pgxpool.Pool, categoryID, name, slug, description strin
 	`
 	product := &models.Product{}
 	err := pool.QueryRow(ctx, query, categoryID, name, slug, description, price, stockQuantity).Scan(
+		&product.ID,
+		&product.CategoryID,
+		&product.Name,
+		&product.Slug,
+		&product.Description,
+		&product.Price,
+		&product.StockQuantity,
+		&product.CreatedAt,
+		&product.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
+func UpdateProductByID(pool *pgxpool.Pool, productID, categoryID, name, slug, description string, price, stockQuantity int) (*models.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+		UPDATE products
+		SET category_id = $2, name = $3, slug = $4, description = $5, price = $6, stock_quantity = $7, updated_at = NOW()
+		WHERE id = $1
+		RETURNING id, category_id, name, slug, description, price, stock_quantity, created_at, updated_at
+	`
+	product := &models.Product{}
+	err := pool.QueryRow(ctx, query, productID, categoryID, name, slug, description, price, stockQuantity).Scan(
 		&product.ID,
 		&product.CategoryID,
 		&product.Name,

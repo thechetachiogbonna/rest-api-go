@@ -18,6 +18,10 @@ func ProductRoutes(pool *pgxpool.Pool) *http.ServeMux {
 		middleware.Authenticate(productHandler.Pool),
 		middleware.IsAdmin(productHandler.Pool),
 	)(http.HandlerFunc(productHandler.CreateProduct)))
+	mux.Handle("PUT /{id}", middleware.CreateStack(
+		middleware.Authenticate(productHandler.Pool),
+		middleware.IsAdmin(productHandler.Pool),
+	)(http.HandlerFunc(productHandler.UpdateProduct)))
 
 	return mux
 }

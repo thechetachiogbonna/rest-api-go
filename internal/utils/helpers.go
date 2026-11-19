@@ -38,3 +38,11 @@ func GetAccessAndRefreshTokens(userID, sessionID string) (accessToken, refreshTo
 func IsUserRoleAdmin(userRole string) bool {
 	return userRole == "admin"
 }
+
+func OrDefault[T comparable](value, fallback T) T {
+	var zero T
+	if value == zero {
+		return fallback
+	}
+	return value
+}

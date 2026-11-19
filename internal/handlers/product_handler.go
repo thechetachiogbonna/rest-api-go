@@ -5,6 +5,7 @@ import (
 	"rest-api-go/internal/repository"
 	"rest-api-go/internal/types"
 	"rest-api-go/internal/utils"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -69,4 +70,46 @@ func (p *Product) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJson(w, http.StatusCreated, map[string]any{"product": product})
+}
+
+func (p *Product) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	productID := r.PathValue("id")
+
+	var payload types.UpdateProductPayload
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	product, err := repository.GetProductByID(p.Pool, productID)
+	if err != nil {
+		if strings.Contains(err.Error(), "product not found") {
+			utils.WriteError(w, http.StatusNotFound, err)
+		}
+
+		return
+	}
+
+	updatedProduct, err := repository.UpdateProductByID(
+		p.Pool,
+		product.ID,
+		utils.OrDefault(payload.CategoryID, product.CategoryID),
+		utils.OrDefault(payload.Name, product.Name),
+		utils.OrDefault(payload.Slug, product.Slug),
+		utils.OrDefault(payload.Description, product.Description),
+		utils.OrDefault(payload.Price, product.Price),
+		utils.OrDefault(payload.StockQuantity, product.StockQuantity),
+	)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, map[string]any{"product": updatedProduct})
 }
