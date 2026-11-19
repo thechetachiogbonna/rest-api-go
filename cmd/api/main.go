@@ -48,7 +48,7 @@ func main() {
 	mux.Handle("/api/users/", http.StripPrefix("/api/users", middleware.Authenticate(pool)(routes.UserRoutes(pool))))
 	mux.Handle("/api/categories/", http.StripPrefix("/api/categories", routes.CategoryRoutes(pool)))
 
-	mux.Handle("GET /api/products/", http.StripPrefix("/api/products", routes.ProductRoutes(pool)))
+	mux.Handle("/api/products/", http.StripPrefix("/api/products", routes.ProductRoutes(pool)))
 
 	port := config.Env.PORT
 

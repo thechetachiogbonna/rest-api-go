@@ -24,7 +24,10 @@ type CreateCategoryPayload struct {
 }
 
 type CreateProductPayload struct {
-	Name        string `json:"name" validate:"required,min=3,max=50"`
-	Slug        string `json:"slug" validate:"required,min=3,max=50"`
-	Description string `json:"description" validate:"required,min`
+	CategoryID    string `json:"category_id" validate:"required"`
+	Name          string `json:"name" validate:"required,min=3,max=50"`
+	Slug          string `json:"slug" validate:"required,min=3,max=50"`
+	Description   string `json:"description" validate:"required,min=10,max=200"`
+	Price         int    `json:"price" validate:"required"`
+	StockQuantity int    `json:"stock_quantity" validate:"required"`
 }

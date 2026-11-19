@@ -32,6 +32,22 @@ GET {{baseUrl}}/auth/refresh
 ### Products - Get all
 GET {{baseUrl}}/products
 
+### Products - Get Product By ID
+GET {{baseUrl}}/products/
+
+### Products - Create Product
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "category_id": "e6cf6996-ae4d-41d0-a697-b1a8249b345f",
+  "name": "IPhone",
+  "slug": "iphone",
+  "description": "I will be right back",
+  "price": 10000,
+  "stock_quantity": 10
+}
+
 ### Users - Get current user
 GET {{baseUrl}}/users/me
 
