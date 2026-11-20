@@ -40,3 +40,7 @@ type UpdateProductPayload struct {
 	Price         int    `json:"price" validate:"omitempty"`
 	StockQuantity int    `json:"stock_quantity" validate:"omitempty"`
 }
+
+type UpdateProductStockQuantityPayload struct {
+	StockQuantity int `json:"stock_quantity" validate:"required"`
+}
