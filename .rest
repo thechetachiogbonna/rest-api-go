@@ -33,7 +33,7 @@ GET {{baseUrl}}/auth/refresh
 GET {{baseUrl}}/products
 
 ### Products - Get Product By ID
-GET {{baseUrl}}/products/29533aa3-6962-47f4-875e-93fa2d8cf849
+GET {{baseUrl}}/products/bbbc510e-5638-4d01-a833-ed4b00264e56
 
 ### Products - Create Product
 POST {{baseUrl}}/products
@@ -41,8 +41,8 @@ Content-Type: application/json
 
 {
   "category_id": "e6cf6996-ae4d-41d0-a697-b1a8249b345f",
-  "name": "IPhone",
-  "slug": "iphone",
+  "name": "Shoes",
+  "slug": "shoes",
   "description": "I will be right back",
   "price": 10000,
   "stock_quantity": 10
@@ -68,6 +68,9 @@ Content-Type: application/json
 {
   "stock_quantity": 120
 }
+
+### Products - Delete Product
+DELETE {{baseUrl}}/products/bbbc510e-5638-4d01-a833-ed4b00264e56
 
 ### Users - Get current user
 GET {{baseUrl}}/users/me

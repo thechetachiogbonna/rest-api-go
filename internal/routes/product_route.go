@@ -26,6 +26,10 @@ func ProductRoutes(pool *pgxpool.Pool) *http.ServeMux {
 		middleware.Authenticate(productHandler.Pool),
 		middleware.IsAdmin(productHandler.Pool),
 	)(http.HandlerFunc(productHandler.UpdateProductStockQuantity)))
+	mux.Handle("DELETE /{id}", middleware.CreateStack(
+		middleware.Authenticate(productHandler.Pool),
+		middleware.IsAdmin(productHandler.Pool),
+	)(http.HandlerFunc(productHandler.DeleteProduct)))
 
 	return mux
 }

@@ -77,7 +77,7 @@ func GetProductByID(pool *pgxpool.Pool, productID string) (*models.Product, erro
 		&product.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.New("category not found")
+			return nil, errors.New("product not found")
 		}
 		return nil, err
 	}
@@ -142,4 +142,21 @@ func UpdateProductByID(pool *pgxpool.Pool, productID, categoryID, name, slug, de
 	}
 
 	return product, nil
+}
+
+func DeleteProduct(pool *pgxpool.Pool, productID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+		DELETE FROM products
+		WHERE id = $1
+	`
+	_, err := pool.Query(ctx, query, productID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

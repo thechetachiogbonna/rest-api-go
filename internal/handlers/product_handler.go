@@ -155,3 +155,25 @@ func (p *Product) UpdateProductStockQuantity(w http.ResponseWriter, r *http.Requ
 
 	utils.WriteJson(w, http.StatusOK, map[string]any{"product": updatedProduct})
 }
+
+func (p *Product) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	productID := r.PathValue("id")
+
+	_, err := repository.GetProductByID(p.Pool, productID)
+	if err != nil {
+		if strings.Contains(err.Error(), "product not found") {
+			utils.WriteError(w, http.StatusNotFound, err)
+		}
+
+		return
+	}
+
+	err = repository.DeleteProduct(p.Pool, productID)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, map[string]string{"message": "Product deleted successfully."})
+}
