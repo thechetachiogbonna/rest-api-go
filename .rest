@@ -33,7 +33,7 @@ GET {{baseUrl}}/auth/refresh
 GET {{baseUrl}}/products
 
 ### Products - Get Product By ID
-GET {{baseUrl}}/products/bbbc510e-5638-4d01-a833-ed4b00264e56
+GET {{baseUrl}}/products/99e0fef7-ae8b-40c1-b716-fd1de5d0cf07
 
 ### Products - Create Product
 POST {{baseUrl}}/products
