@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type RegisterPayload struct {
 	FirstName string `json:"first_name" validate:"required,min=5,max=20"`
 	LastName  string `json:"last_name" validate:"required,min=5,max=20"`
@@ -43,4 +45,22 @@ type UpdateProductPayload struct {
 
 type UpdateProductStockQuantityPayload struct {
 	StockQuantity int `json:"stock_quantity" validate:"required"`
+}
+
+type productDetails struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Slug  string `json:"slug"`
+	Price int    `json:"price"`
+}
+
+type CartItem struct {
+	ID        string         `json:"id"`
+	CartID    string         `json:"cart_id"`
+	ProductID string         `json:"product_id"`
+	Quantity  int            `json:"quantity"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	Product   productDetails `json:"product"`
+	ItemTotal int            `json:"item_total"`
 }

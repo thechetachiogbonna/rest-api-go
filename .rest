@@ -97,3 +97,6 @@ Content-Type: application/json
   "name": "Bags",
   "slug": "bags"
 }
+
+### Cart - Get Current User Cart Items
+GET {{baseUrl}}/cart
