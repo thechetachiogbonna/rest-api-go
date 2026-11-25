@@ -53,10 +53,11 @@ func GetAllProducts(pool *pgxpool.Pool) ([]*models.Product, error) {
 	return products, nil
 }
 
-func GetProductByID(pool *pgxpool.Pool, productID string) (*models.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+type DB interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
 
+func GetProductByID(ctx context.Context, db DB, productID string) (*models.Product, error) {
 	query := `
 		SELECT id, category_id, name, slug, description, price, stock_quantity, created_at, updated_at
 		FROM products
@@ -65,7 +66,7 @@ func GetProductByID(pool *pgxpool.Pool, productID string) (*models.Product, erro
 
 	product := &models.Product{}
 
-	if err := pool.QueryRow(ctx, query, productID).Scan(
+	if err := db.QueryRow(ctx, query, productID).Scan(
 		&product.ID,
 		&product.CategoryID,
 		&product.Name,

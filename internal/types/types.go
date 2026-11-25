@@ -64,3 +64,8 @@ type CartItem struct {
 	Product   productDetails `json:"product"`
 	ItemTotal int            `json:"item_total"`
 }
+
+type AddItemToCartPayload struct {
+	ProductID string `json:"product_id"`
+	Quantity  int    `json:"quantity"`
+}

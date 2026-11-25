@@ -70,7 +70,7 @@ Content-Type: application/json
 }
 
 ### Products - Delete Product
-DELETE {{baseUrl}}/products/bbbc510e-5638-4d01-a833-ed4b00264e56
+DELETE {{baseUrl}}/products/99e0fef7-ae8b-40c1-b716-fd1de5d0cf07
 
 ### Users - Get current user
 GET {{baseUrl}}/users/me
@@ -100,3 +100,12 @@ Content-Type: application/json
 
 ### Cart - Get Current User Cart Items
 GET {{baseUrl}}/cart
+
+### Cart - Add Item To Cart
+POST {{baseUrl}}/cart/items
+Content-Type: application/json
+
+{
+  "product_id": "99e0fef7-ae8b-40c1-b716-fd1de5d0cf07",
+  "quantity": 2
+}

@@ -30,7 +30,7 @@ func (p *Product) GetAllProducts(w http.ResponseWriter, r *http.Request) {
 func (p *Product) GetProductByID(w http.ResponseWriter, r *http.Request) {
 	productID := r.PathValue("id")
 
-	product, err := repository.GetProductByID(p.Pool, productID)
+	product, err := repository.GetProductByID(r.Context(), p.Pool, productID)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
@@ -86,7 +86,7 @@ func (p *Product) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, err := repository.GetProductByID(p.Pool, productID)
+	product, err := repository.GetProductByID(r.Context(), p.Pool, productID)
 	if err != nil {
 		if strings.Contains(err.Error(), "product not found") {
 			utils.WriteError(w, http.StatusNotFound, err)
@@ -128,7 +128,7 @@ func (p *Product) UpdateProductStockQuantity(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	product, err := repository.GetProductByID(p.Pool, productID)
+	product, err := repository.GetProductByID(r.Context(), p.Pool, productID)
 	if err != nil {
 		if strings.Contains(err.Error(), "product not found") {
 			utils.WriteError(w, http.StatusNotFound, err)
@@ -159,7 +159,7 @@ func (p *Product) UpdateProductStockQuantity(w http.ResponseWriter, r *http.Requ
 func (p *Product) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	productID := r.PathValue("id")
 
-	_, err := repository.GetProductByID(p.Pool, productID)
+	_, err := repository.GetProductByID(r.Context(), p.Pool, productID)
 	if err != nil {
 		if strings.Contains(err.Error(), "product not found") {
 			utils.WriteError(w, http.StatusNotFound, err)

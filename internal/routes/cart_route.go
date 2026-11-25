@@ -12,6 +12,7 @@ func CartRoutes(pool *pgxpool.Pool) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /", cartHandler.GetCurrentUserCartItems)
+	mux.HandleFunc("POST /items", cartHandler.AddItemToCart)
 
 	return mux
 }
